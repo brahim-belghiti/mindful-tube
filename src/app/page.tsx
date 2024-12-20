@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import VideoUrlInput from '@/componenets/videoUrlInput';
+import VideoUrlInput from '@/components/videoUrlInput';
 
 export default function Home() {
   return (
@@ -20,7 +20,6 @@ export default function Home() {
           height={10}
         />
         <VideoUrlInput />
-   
       </div>
       <div className="flex flex-col gap-2 lg:gap-6">
         <h1 className="text-lg lg:text-3xl font-semibold">
