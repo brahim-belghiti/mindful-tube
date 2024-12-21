@@ -21,3 +21,38 @@ body {
 }
 
 
+/* editor.css */
+
+/* Default Editor Styling */
+.mdx-editor {
+  background-color: #ffffff;
+  color: #000000;
+  border-radius: 8px;
+  padding: 16px;
+  font-family: 'Inter', sans-serif;
+}
+
+/* Dark Mode */
+.dark .mdx-editor {
+  background-color: #000000; /* Dark background */
+  color: #ffffff; /* Light text */
+  border-color: #000000;
+}
+
+/* Custom Placeholder Styling */
+.mdx-editor .placeholder {
+  color: #9ca3af; /* Neutral gray for light mode */
+}
+
+.dark .mdx-editor .placeholder {
+  color: #6b7280; /* Softer gray for dark mode */
+}
+
+/* Handle Focus State */
+.mdx-editor:focus-within {
+  outline: 2px solid #f97316; /* Tailwind's orange-500 */
+}
+
+.dark .mdx-editor:focus-within {
+  outline: 2px solid #fb923c; /* Tailwind's orange-400 */
+}
