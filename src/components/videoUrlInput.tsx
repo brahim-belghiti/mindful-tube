@@ -2,11 +2,12 @@
 
 import { useRef } from 'react';
 import { validYoutbeUrlLink } from '@/lib/utils';
+import { useRouter } from 'next/navigation';
 
 const VideoUrlInput = () => {
   const videoUrl = useRef<HTMLInputElement>(null);
   const feedbackRef = useRef<HTMLDivElement>(null);
-
+  const router = useRouter();
   const handleSubmit = () => {
     if (videoUrl.current && feedbackRef.current) {
       const url = videoUrl.current.value;
@@ -23,6 +24,7 @@ const VideoUrlInput = () => {
         feedbackRef.current.className =
           'w-full lg:w-10/12 bg-green-100 border border-green-400 text-green-700 px-4 py-3 relative rounded-full mt-5 dark:bg-green-900 dark:border-green-600 dark:text-green-200';
         console.log('Valid URL. Redirect logic will go here.');
+        router.push(`/focus?id=${videoId}`);
       }
     }
   };
