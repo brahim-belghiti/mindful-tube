@@ -18,9 +18,7 @@ export default async function Page({
     <main className="h-full w-full relative">
       <section className="w-full h-full flex items-center justify-center">
         <Suspense fallback={<VideoPlayerSkeleton />}>
-          <VideoPlayer
-            videoId={Array.isArray(videoId) ? videoId[0] : videoId}
-          />
+          <VideoPlayer videoId={videoId} />
         </Suspense>
       </section>
 

@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
@@ -27,7 +27,6 @@ export default function VideoPlayer({ videoId }: TProps) {
     }
   }, [isCompleted, router]);
 
-  // Ensure videoId is a string
   const validVideoId = Array.isArray(videoId) ? videoId[0] : videoId;
 
   return (
