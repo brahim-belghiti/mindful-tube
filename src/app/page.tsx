@@ -7,7 +7,7 @@ export default function Home() {
       <div className="w-full">
         <h3 className="text-3xl xl:text-5xl text-left font-light">Escape</h3>
         <h3 className="text-3xl xl:text-5xl text-lef font-light">
-          the rabbit hole.{' '}
+          the rabbit hole.
         </h3>
         <h3 className="text-3xl xl:text-6xl text-lef font-black">be focused</h3>
       </div>
@@ -26,11 +26,11 @@ export default function Home() {
           Distraction-Free Learning with YouTube
         </h1>
         <p className="text-base lg:text-lg">
-          YouTube is an incredible platform for learning, but it's not without
+          YouTube is an incredible platform for learning, but it&apos;s not without
           its distractions. From the suggestion bar to comment threads, staying
           focused can be a real challenge. Not to mention, visiting YouTube for
           one video often spirals into hours of unrelated content. We get it.
-          That's why we built Mindful tube — a YouTube client designed to keep
+          That&apos;s why we built Mindful tube — a YouTube client designed to keep
           you on track.
         </p>
       </div>
