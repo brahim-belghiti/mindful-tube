@@ -30,7 +30,7 @@ export default function Home() {
           its distractions. From the suggestion bar to comment threads, staying
           focused can be a real challenge. Not to mention, visiting YouTube for
           one video often spirals into hours of unrelated content. We get it.
-          That's why we built Mindfull tube — a YouTube client designed to keep
+          That's why we built Mindful tube — a YouTube client designed to keep
           you on track.
         </p>
       </div>

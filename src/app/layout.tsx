@@ -10,7 +10,7 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: 'mindfull tube',
+  title: 'mindful tube',
   description: 'A YouTube client designed to keep you on track.',
 };
 
