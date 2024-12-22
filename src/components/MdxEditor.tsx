@@ -24,7 +24,7 @@ export default function mdxEditor() {
     <div className="p-4 h-full overflow-y-auto">
       <MDXEditor
         ref={editorRef}
-        markdown="Start writing here..."
+        markdown=""
         className="mdx-editor min-h-[600px]"
         contentEditableClassName="prose dark:prose-invert max-w-none"
         plugins={[
