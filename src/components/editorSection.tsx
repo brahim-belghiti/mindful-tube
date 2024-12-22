@@ -20,11 +20,18 @@ const Editor = dynamic(() => import('./mdxEditor'), {
 });
 
 const STORAGE_KEY = 'editor-content';
+const COPY_NOTIFICATION_DURATION = 2000;
 
 export default function EditorSection() {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isMinimized, setIsMinimized] = useState(false);
-  const [isCopied, setIsCopied] = useState(false);
+  const [editorState, setEditorState] = useState({
+    isExpanded: false,
+    isMinimized: false,
+    isCopied: false,
+  });
+
+  const handleEditorState = (key: keyof typeof editorState) => {
+    setEditorState((prev) => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const handleClearNotes = () => {
     if (
@@ -39,14 +46,17 @@ export default function EditorSection() {
 
   const handleCopy = async () => {
     const content = localStorage.getItem(STORAGE_KEY);
-    if (content) {
-      try {
-        await navigator.clipboard.writeText(content);
-        setIsCopied(true);
-        setTimeout(() => setIsCopied(false), 2000);
-      } catch (err) {
-        console.error('Failed to copy text:', err);
-      }
+    if (!content) return;
+
+    try {
+      await navigator.clipboard.writeText(content);
+      setEditorState((prev) => ({ ...prev, isCopied: true }));
+      setTimeout(
+        () => setEditorState((prev) => ({ ...prev, isCopied: false })),
+        COPY_NOTIFICATION_DURATION
+      );
+    } catch (err) {
+      console.error('Failed to copy text:', err);
     }
   };
 
@@ -58,8 +68,8 @@ export default function EditorSection() {
         'rounded-lg shadow-lg',
         'border border-orange-300',
         'fixed top-4 right-4 z-50',
-        !isMinimized ? 'w-[300px]' : 'w-full lg:w-1/2',
-        isExpanded
+        !editorState.isMinimized ? 'w-[300px]' : 'w-full lg:w-1/2',
+        editorState.isExpanded
           ? 'h-[calc(100vh-2rem)] max-h-[800px]'
           : 'h-[60px] overflow-hidden'
       )}
@@ -77,7 +87,7 @@ export default function EditorSection() {
             className={cn(
               'p-2 rounded-full transition-colors',
               'hover:bg-gray-100 dark:hover:bg-gray-800',
-              isCopied && 'text-green-500'
+              editorState.isCopied && 'text-green-500'
             )}
             aria-label="Copy notes"
           >
@@ -94,24 +104,36 @@ export default function EditorSection() {
             <Trash2 size={20} />
           </button>
           <button
-            onClick={() => setIsMinimized(!isMinimized)}
+            onClick={() => handleEditorState('isMinimized')}
             className={cn(
               'p-2 rounded-full transition-colors',
               'hover:bg-gray-100 dark:hover:bg-gray-800'
             )}
-            aria-label={isMinimized ? 'Maximize editor' : 'Minimize editor'}
+            aria-label={
+              editorState.isMinimized ? 'Maximize editor' : 'Minimize editor'
+            }
           >
-            {isMinimized ? <Maximize2 size={20} /> : <Minimize2 size={20} />}
+            {editorState.isMinimized ? (
+              <Maximize2 size={20} />
+            ) : (
+              <Minimize2 size={20} />
+            )}
           </button>
           <button
-            onClick={() => setIsExpanded(!isExpanded)}
+            onClick={() => handleEditorState('isExpanded')}
             className={cn(
               'p-2 rounded-full transition-colors',
               'hover:bg-gray-100 dark:hover:bg-gray-800'
             )}
-            aria-label={isExpanded ? 'Collapse editor' : 'Expand editor'}
+            aria-label={
+              editorState.isExpanded ? 'Collapse editor' : 'Expand editor'
+            }
           >
-            {isExpanded ? <ChevronDown size={20} /> : <ChevronUp size={20} />}
+            {editorState.isExpanded ? (
+              <ChevronDown size={20} />
+            ) : (
+              <ChevronUp size={20} />
+            )}
           </button>
         </div>
       </div>
@@ -119,7 +141,7 @@ export default function EditorSection() {
       <div
         className={cn(
           'transition-all duration-300',
-          isExpanded ? 'opacity-100' : 'opacity-0 h-0'
+          editorState.isExpanded ? 'opacity-100' : 'opacity-0 h-0'
         )}
       >
         <Editor />
