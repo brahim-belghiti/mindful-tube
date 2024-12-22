@@ -10,10 +10,11 @@ type SearchParams = { [key: string]: string | string[] | undefined };
 export default async function Page({
   searchParams,
 }: {
-  searchParams: SearchParams;
+  searchParams: Promise<SearchParams>;
 }) {
-  const videoId = searchParams?.id;
-
+  const resolvedSearchParams = await searchParams;
+  const videoId = resolvedSearchParams?.id;
+  
   return (
     <main className="h-full w-full relative">
       <section className="w-full h-full flex items-center justify-center">
@@ -23,7 +24,9 @@ export default async function Page({
       </section>
 
       <section className="flex-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-orange-300 absolute top-4 right-4">
-        <Editor />
+        <Suspense fallback={<div>Loading Editor...</div>}>
+          <Editor />
+        </Suspense>
       </section>
     </main>
   );
