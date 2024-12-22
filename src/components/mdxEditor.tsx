@@ -34,13 +34,12 @@ export default function EditorSection() {
   };
 
   return (
-    <div className="p-4 h-full">
+    <div className="p-2">
       <MDXEditor
         ref={editorRef}
         markdown={markdown}
         onChange={handleChange}
-        className="mdx-editor min-h-[600px]"
-        contentEditableClassName="prose dark:prose-invert max-w-none"
+        className="mdx-editor min-h-[700px] max-h-[800px] overflow-y-hidden"
         plugins={[
           markdownShortcutPlugin(),
           headingsPlugin({
