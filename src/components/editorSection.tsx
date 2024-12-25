@@ -69,7 +69,7 @@ export default function EditorSection() {
         'border border-orange-300',
         'fixed top-4 right-4 z-50',
         editorState.isMinimized ? 'w-[300px]' : 'w-full lg:w-1/2',
-        editorState.isExpanded
+        !editorState.isExpanded
           ? 'h-[calc(100vh-2rem)] max-h-[800px]'
           : 'h-[60px] overflow-hidden'
       )}
