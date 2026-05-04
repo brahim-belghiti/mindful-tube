@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useRef } from 'react';
 import {
   MDXEditor,
   headingsPlugin,
@@ -14,54 +14,52 @@ import {
   toolbarPlugin,
   MDXEditorMethods,
   InsertThematicBreak,
+  codeBlockPlugin,
+  codeMirrorPlugin,
+  linkPlugin,
+  linkDialogPlugin,
 } from '@mdxeditor/editor';
 import '@mdxeditor/editor/style.css';
 
-const STORAGE_KEY = 'editor-content';
+interface EditorProps {
+  markdown: string;
+  onChange: (markdown: string) => void;
+}
 
-export default function EditorSection() {
+export default function Editor({ markdown, onChange }: EditorProps) {
   const editorRef = useRef<MDXEditorMethods>(null);
-  const [markdown, setMarkdown] = useState(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem(STORAGE_KEY) || '';
-    }
-    return '';
-  });
-
-  const handleChange = (newMarkdown: string) => {
-    setMarkdown(newMarkdown);
-    localStorage.setItem(STORAGE_KEY, newMarkdown);
-  };
 
   return (
-    <div className="p-2">
-      <MDXEditor
-        ref={editorRef}
-        markdown={markdown}
-        onChange={handleChange}
-        className="mdx-editor min-h-[700px] max-h-[800px] overflow-y-hidden"
-        plugins={[
-          markdownShortcutPlugin(),
-          headingsPlugin({
-            allowedHeadingLevels: [1, 2, 3, 4, 5, 6],
-          }),
-          listsPlugin({
-            allowedListTypes: ['bullet', 'number'],
-          }),
-          quotePlugin(),
-          thematicBreakPlugin(),
-          toolbarPlugin({
-            toolbarContents: () => (
-              <div className="flex flex-wrap gap-2">
-                <UndoRedo />
-                <BoldItalicUnderlineToggles />
-                <ListsToggle />
-                <InsertThematicBreak />
-              </div>
-            ),
-          }),
-        ]}
-      />
-    </div>
+    <MDXEditor
+      ref={editorRef}
+      markdown={markdown}
+      onChange={onChange}
+      className="mdx-editor min-h-[500px]"
+      contentEditableClassName="prose prose-sm dark:prose-invert max-w-none p-4"
+      placeholder="Start typing your notes..."
+      plugins={[
+        headingsPlugin({
+          allowedHeadingLevels: [1, 2, 3],
+        }),
+        listsPlugin(),
+        quotePlugin(),
+        thematicBreakPlugin(),
+        linkPlugin(),
+        linkDialogPlugin(),
+        codeBlockPlugin(),
+        codeMirrorPlugin({ codeBlockLanguages: { js: 'JavaScript', ts: 'TypeScript', py: 'Python', css: 'CSS' } }),
+        markdownShortcutPlugin(),
+        toolbarPlugin({
+          toolbarContents: () => (
+            <div className="flex flex-wrap items-center gap-1">
+              <UndoRedo />
+              <BoldItalicUnderlineToggles />
+              <ListsToggle />
+              <InsertThematicBreak />
+            </div>
+          ),
+        }),
+      ]}
+    />
   );
 }

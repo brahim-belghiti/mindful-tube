@@ -23,11 +23,9 @@ export default async function Page({
         </Suspense>
       </section>
 
-      <section className="flex-1 bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-orange-300 absolute top-4 right-4">
-        <Suspense fallback={<div>Loading Editor...</div>}>
-          <Editor />
-        </Suspense>
-      </section>
+      <Suspense fallback={<div>Loading Editor...</div>}>
+        <Editor />
+      </Suspense>
     </main>
   );
 }
