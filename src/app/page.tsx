@@ -1,4 +1,5 @@
 import VideoUrlInput from '@/components/videoUrlInput';
+import RecentlyWatched from '@/components/recentlyWatched';
 
 export default function Home() {
   return (
@@ -23,6 +24,8 @@ export default function Home() {
         </p>
         <VideoUrlInput />
       </div>
+
+      <RecentlyWatched />
 
       {/* About */}
       <div className="w-full max-w-2xl flex flex-col gap-3 border-t border-gray-200 dark:border-gray-800 pt-10">

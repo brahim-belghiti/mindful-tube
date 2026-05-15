@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
 import { useVideoContext } from '@/lib/videoContext';
+import { recordWatch } from '@/lib/watchHistory';
 
 type TProps = {
   videoId: string | string[] | undefined;
@@ -47,7 +48,10 @@ export default function VideoPlayer({ videoId, playlistId }: TProps) {
         opts={videoOptions}
         iframeClassName="w-full h-full rounded-lg"
         className="w-full h-full"
-        onReady={(e) => { playerRef.current = e.target; }}
+        onReady={(e) => {
+          playerRef.current = e.target;
+          if (validVideoId) recordWatch(validVideoId);
+        }}
         onEnd={() => { if (!validPlaylistId) setIsCompleted(true); }}
       />
     </div>
