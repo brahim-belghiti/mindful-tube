@@ -24,14 +24,16 @@ import '@mdxeditor/editor/style.css';
 interface EditorProps {
   markdown: string;
   onChange: (markdown: string) => void;
+  editorRef?: React.RefObject<MDXEditorMethods | null>;
 }
 
-export default function Editor({ markdown, onChange }: EditorProps) {
-  const editorRef = useRef<MDXEditorMethods>(null);
+export default function Editor({ markdown, onChange, editorRef }: EditorProps) {
+  const localRef = useRef<MDXEditorMethods>(null);
+  const ref = editorRef ?? localRef;
 
   return (
     <MDXEditor
-      ref={editorRef}
+      ref={ref}
       markdown={markdown}
       onChange={onChange}
       className="mdx-editor min-h-[500px]"

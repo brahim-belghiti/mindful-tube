@@ -1,37 +1,34 @@
-import Image from 'next/image';
 import VideoUrlInput from '@/components/videoUrlInput';
 
 export default function Home() {
   return (
-    <main className="w-full h-full flex flex-col justify-center items-cente p-6 lg:p-8 gap-12 lg:gap-24">
-      <div className="w-full">
-        <h3 className="text-3xl xl:text-5xl text-left font-light">Escape</h3>
-        <h3 className="text-3xl xl:text-5xl text-lef font-light">
-          the rabbit hole.
-        </h3>
-        <h3 className="text-3xl xl:text-6xl text-lef font-black">be focused</h3>
+    <main className="w-full min-h-full flex flex-col justify-center items-center p-6 lg:p-8 gap-16 lg:gap-20">
+      {/* Hero */}
+      <div className="w-full max-w-2xl flex flex-col items-start gap-2">
+        <p className="text-sm font-medium tracking-widest uppercase text-orange-500 dark:text-orange-400">
+          Mindful Tube
+        </p>
+        <h1 className="text-4xl xl:text-6xl font-black leading-tight">
+          Escape the rabbit hole.
+        </h1>
+        <p className="text-xl xl:text-2xl font-light text-gray-600 dark:text-gray-400 mt-1">
+          Watch the video. Get back to work.
+        </p>
       </div>
-      <div className="w-full flex flex-col justify-around gap-8">
-        <Image
-          src="/assets/capture.png"
-          alt="instruction to where to put the youtube link to watch it on the app"
-          className="lg:w-8/12"
-          width={380}
-          height={10}
-        />
+
+      {/* Input */}
+      <div className="w-full max-w-2xl flex flex-col gap-3">
         <VideoUrlInput />
       </div>
-      <div className="flex flex-col gap-2 lg:gap-6">
-        <h1 className="text-lg lg:text-3xl font-semibold">
-          Distraction-Free Learning with YouTube
-        </h1>
-        <p className="text-base lg:text-lg">
-          YouTube is an incredible platform for learning, but it&apos;s not without
-          its distractions. From the suggestion bar to comment threads, staying
-          focused can be a real challenge. Not to mention, visiting YouTube for
-          one video often spirals into hours of unrelated content. We get it.
-          That&apos;s why we built Mindful tube — a YouTube client designed to keep
-          you on track.
+
+      {/* About */}
+      <div className="w-full max-w-2xl flex flex-col gap-3 border-t border-gray-200 dark:border-gray-800 pt-10">
+        <h2 className="text-lg font-semibold">Why Mindful Tube?</h2>
+        <p className="text-base text-gray-600 dark:text-gray-400 leading-relaxed">
+          YouTube is great for learning, but recommendations and comment threads
+          turn a 5-minute watch into a 40-minute detour. Mindful Tube strips
+          everything away — just the video, a distraction-free player, and a
+          built-in notes panel so you capture what matters before moving on.
         </p>
       </div>
     </main>

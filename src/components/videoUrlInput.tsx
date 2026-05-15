@@ -1,54 +1,102 @@
 'use client';
 
-import { useRef } from 'react';
+import { useState, useRef, useTransition } from 'react';
 import { validYoutbeUrlLink } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
+import { ArrowRight } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const VideoUrlInput = () => {
-  const videoUrl = useRef<HTMLInputElement>(null);
-  const feedbackRef = useRef<HTMLDivElement>(null);
+  const [url, setUrl] = useState('');
+  const [error, setError] = useState('');
+  const [isPending, startTransition] = useTransition();
+  const inputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const handleSubmit = () => {
-    if (videoUrl.current && feedbackRef.current) {
-      const url = videoUrl.current.value;
-      const videoId = validYoutbeUrlLink(url);
 
-      if (!videoId) {
-        feedbackRef.current.textContent =
-          '❌ Invalid YouTube URL. Please enter a valid link.';
-        feedbackRef.current.className =
-          'w-full lg:w-10/12 bg-red-100 border border-red-400 text-red-700 px-4 py-3 relative rounded-full mt-5 dark:bg-red-900 dark:border-red-600 dark:text-red-200';
-      } else {
-        feedbackRef.current.textContent =
-          '✅ Valid YouTube URL. You will be redirected shortly.';
-        feedbackRef.current.className =
-          'w-full lg:w-10/12 bg-green-100 border border-green-400 text-green-700 px-4 py-3 relative rounded-full mt-5 dark:bg-green-900 dark:border-green-600 dark:text-green-200';
-        console.log('Valid URL. Redirect logic will go here.');
-        router.push(`/focus?id=${videoId}`);
-      }
-    }
+  const validate = (value: string) => {
+    if (!value.trim()) return '';
+    const id = validYoutbeUrlLink(value);
+    return id ? '' : 'Please enter a valid YouTube URL.';
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const videoId = validYoutbeUrlLink(url);
+    if (!videoId) {
+      setError('Please enter a valid YouTube URL.');
+      inputRef.current?.focus();
+      return;
+    }
+    setError('');
+    startTransition(() => {
+      router.push(`/focus?id=${videoId}`);
+    });
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setUrl(value);
+    if (error) setError(validate(value));
+  };
+
+  const hasError = !!error;
+
   return (
-    <div className="w-full flex flex-col gap-2">
-      <input
-        className="w-full lg:w-10/12 mt-1 block py-2 px-3 border-4 border-orange-400 bg-white rounded-full shadow-sm focus:outline-none focus:ring-orange-600 focus:border-orange-600 font-light text-lg xl:text-xl h-14 dark:bg-gray-800 dark:border-orange-500 dark:placeholder-gray-400 dark:text-white"
-        placeholder="Paste your YouTube video link here: https://www.youtube.com/watch?v=D55ctBYF3AY"
-        type="text"
-        ref={videoUrl}
-      />
-      <button
-        className="w-full lg:w-10/12 bg-orange-400 text-white py-2 px-4 rounded-full shadow-sm hover:bg-orange-600 focus:ring-2 focus:ring-orange-600 font-light text-lg xl:text-xl h-14 dark:bg-orange-500 dark:hover:bg-orange-600"
-        onClick={handleSubmit}
-      >
-        Submit
-      </button>
-      <div
-        ref={feedbackRef}
-        aria-live="polite"
-        className="w-full lg:w-10/12 mt-5"
-      ></div>
-    </div>
+    <form onSubmit={handleSubmit} className="w-full flex flex-col gap-3" noValidate>
+      <label htmlFor="youtube-url" className="text-sm font-medium text-gray-700 dark:text-gray-300">
+        YouTube link
+      </label>
+      <div className="relative flex items-center">
+        <input
+          id="youtube-url"
+          ref={inputRef}
+          type="url"
+          value={url}
+          onChange={handleChange}
+          onBlur={() => setError(validate(url))}
+          disabled={isPending}
+          placeholder="https://www.youtube.com/watch?v=..."
+          className={cn(
+            'w-full pr-14 pl-4 py-3.5 rounded-2xl border-2 text-base',
+            'bg-white dark:bg-gray-900',
+            'placeholder-gray-400 dark:placeholder-gray-600',
+            'text-gray-900 dark:text-white',
+            'focus:outline-none focus:ring-2 focus:ring-offset-2',
+            'disabled:opacity-60 disabled:cursor-not-allowed',
+            'transition-colors duration-150',
+            hasError
+              ? 'border-red-400 focus:border-red-500 focus:ring-red-400'
+              : 'border-orange-400 dark:border-orange-500 focus:border-orange-500 focus:ring-orange-400'
+          )}
+          aria-describedby={hasError ? 'url-error' : undefined}
+          aria-invalid={hasError}
+        />
+        <button
+          type="submit"
+          disabled={isPending || !url.trim()}
+          aria-label="Watch video"
+          className={cn(
+            'absolute right-2 p-2.5 rounded-xl',
+            'bg-orange-400 hover:bg-orange-500 dark:bg-orange-500 dark:hover:bg-orange-600',
+            'text-white',
+            'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:ring-offset-2',
+            'disabled:opacity-50 disabled:cursor-not-allowed',
+            'transition-all duration-150'
+          )}
+        >
+          {isPending ? (
+            <span className="w-4 h-4 block border-2 border-white border-t-transparent rounded-full animate-spin" />
+          ) : (
+            <ArrowRight size={16} />
+          )}
+        </button>
+      </div>
+      {hasError && (
+        <p id="url-error" role="alert" className="text-sm text-red-600 dark:text-red-400">
+          {error}
+        </p>
+      )}
+    </form>
   );
 };
 
