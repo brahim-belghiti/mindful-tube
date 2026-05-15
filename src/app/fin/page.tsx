@@ -1,6 +1,16 @@
 import Link from 'next/link';
+import FinNotes from '@/components/finNotes';
 
-export default function FinPage() {
+type SearchParams = { [key: string]: string | string[] | undefined };
+
+export default async function FinPage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const resolved = await searchParams;
+  const videoId = typeof resolved?.id === 'string' ? resolved.id : undefined;
+
   return (
     <main className="min-h-screen flex flex-col items-center justify-center p-8">
       <div className="w-full max-w-2xl flex flex-col gap-12">
@@ -24,6 +34,8 @@ export default function FinPage() {
             Watch another video
           </Link>
         </div>
+
+        <FinNotes videoId={videoId} />
 
         <div className="border-t border-gray-200 dark:border-gray-800 pt-8 flex flex-col gap-3">
           <p className="text-base text-gray-600 dark:text-gray-400">

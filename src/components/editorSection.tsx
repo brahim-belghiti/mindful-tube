@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import dynamic from 'next/dynamic';
 import { getStoredContent, saveContent, clearStoredContent, getPanelState, savePanelState } from '@/lib/editorStorage';
 import { useVideoContext, formatTimestamp } from '@/lib/videoContext';
+import { useIsMobile } from '@/lib/useIsMobile';
 import { marked } from 'marked';
 import { MDXEditorMethods } from '@mdxeditor/editor';
 
@@ -46,10 +47,15 @@ interface Toast {
   type: ToastType;
 }
 
-export default function EditorSection() {
-  const initialPanelState = useMemo(() => getPanelState(), []);
+interface EditorSectionProps {
+  videoId?: string;
+}
 
-  const [markdown, setMarkdown] = useState(() => getStoredContent() || STARTING_TEMPLATE);
+export default function EditorSection({ videoId }: EditorSectionProps) {
+  const initialPanelState = useMemo(() => getPanelState(), []);
+  const isMobile = useIsMobile();
+
+  const [markdown, setMarkdown] = useState(() => getStoredContent(videoId) || STARTING_TEMPLATE);
   const [isExpanded, setIsExpanded] = useState(initialPanelState.isExpanded);
   const [width, setWidth] = useState(initialPanelState.width);
   const [isPreview, setIsPreview] = useState(false);
@@ -74,11 +80,11 @@ export default function EditorSection() {
     }
 
     debounceTimerRef.current = setTimeout(() => {
-      saveContent(content);
+      saveContent(content, videoId);
       setLastSaved(new Date());
       setIsSaving(false);
     }, DEBOUNCE_DELAY);
-  }, []);
+  }, [videoId]);
 
   const handleChange = useCallback((newMarkdown: string) => {
     setMarkdown(newMarkdown);
@@ -89,11 +95,11 @@ export default function EditorSection() {
     if (debounceTimerRef.current) {
       clearTimeout(debounceTimerRef.current);
     }
-    saveContent(markdown);
+    saveContent(markdown, videoId);
     setLastSaved(new Date());
     setIsSaving(false);
     showToast('Notes saved!', 'success');
-  }, [markdown, showToast]);
+  }, [markdown, videoId, showToast]);
 
   useEffect(() => {
     return () => {
@@ -165,7 +171,7 @@ export default function EditorSection() {
       setTimeout(() => setConfirmClear(false), 3000);
       return;
     }
-    clearStoredContent();
+    clearStoredContent(videoId);
     setMarkdown('');
     setLastSaved(null);
     setConfirmClear(false);
@@ -229,11 +235,15 @@ export default function EditorSection() {
         className={cn(
           'relative transition-all duration-200',
           'bg-white dark:bg-gray-900',
-          'border-l border-orange-300/50 dark:border-orange-500/30',
-          'flex flex-col shrink-0 h-full',
-          isExpanded ? 'w-[44px]' : ''
+          'flex flex-col shrink-0',
+          isMobile
+            ? 'w-full border-t border-orange-300/50 dark:border-orange-500/30'
+            : cn(
+                'h-full border-l border-orange-300/50 dark:border-orange-500/30',
+                isExpanded ? 'w-[44px]' : ''
+              )
         )}
-        style={isExpanded ? undefined : { width: `${width}px` }}
+        style={!isMobile && !isExpanded ? { width: `${width}px` } : undefined}
       >
         {/* Header */}
         <div
@@ -364,8 +374,8 @@ export default function EditorSection() {
           )}
         </div>
 
-        {/* Resize handle — left edge of the sidebar, inside relative section */}
-        {!isExpanded && (
+        {/* Resize handle — desktop sidebar only */}
+        {!isMobile && !isExpanded && (
           <div
             className={cn(
               'absolute top-0 left-0 h-full w-1 cursor-col-resize group z-10',

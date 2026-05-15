@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useTransition } from 'react';
-import { validYoutbeUrlLink } from '@/lib/utils';
+import { validYoutbeUrlLink, extractPlaylistId } from '@/lib/utils';
 import { useRouter } from 'next/navigation';
 import { ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -15,21 +15,28 @@ const VideoUrlInput = () => {
 
   const validate = (value: string) => {
     if (!value.trim()) return '';
-    const id = validYoutbeUrlLink(value);
-    return id ? '' : 'Please enter a valid YouTube URL.';
+    const videoId = validYoutbeUrlLink(value);
+    const playlistId = extractPlaylistId(value);
+    return videoId || playlistId ? '' : 'Please enter a valid YouTube video or playlist URL.';
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const videoId = validYoutbeUrlLink(url);
-    if (!videoId) {
-      setError('Please enter a valid YouTube URL.');
+    const playlistId = extractPlaylistId(url);
+
+    if (!videoId && !playlistId) {
+      setError('Please enter a valid YouTube video or playlist URL.');
       inputRef.current?.focus();
       return;
     }
+
     setError('');
     startTransition(() => {
-      router.push(`/focus?id=${videoId}`);
+      const params = new URLSearchParams();
+      if (videoId) params.set('id', videoId);
+      if (playlistId) params.set('list', playlistId);
+      router.push(`/focus?${params.toString()}`);
     });
   };
 
@@ -55,7 +62,7 @@ const VideoUrlInput = () => {
           onChange={handleChange}
           onBlur={() => setError(validate(url))}
           disabled={isPending}
-          placeholder="https://www.youtube.com/watch?v=..."
+          placeholder="Paste a YouTube video or playlist link…"
           className={cn(
             'w-full pr-14 pl-4 py-3.5 rounded-2xl border-2 text-base',
             'bg-white dark:bg-gray-900',

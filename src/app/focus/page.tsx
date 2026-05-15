@@ -16,10 +16,11 @@ export default async function Page({
 }) {
   const resolvedSearchParams = await searchParams;
   const videoId = resolvedSearchParams?.id;
+  const playlistId = resolvedSearchParams?.list;
 
   return (
     <FocusLayout>
-      <main className="flex flex-col h-screen w-full overflow-hidden">
+      <main className="flex flex-col w-full min-h-screen lg:h-screen lg:overflow-hidden">
         {/* Top bar */}
         <header className="flex items-center px-4 py-2 border-b border-gray-200 dark:border-gray-800 shrink-0">
           <Link
@@ -30,18 +31,18 @@ export default async function Page({
           </Link>
         </header>
 
-        {/* Content: video + notes side by side */}
-        <div className="flex flex-1 overflow-hidden">
+        {/* Content: stacked on mobile, side-by-side on desktop */}
+        <div className="flex flex-col lg:flex-row flex-1 lg:overflow-hidden">
           {/* Video area */}
-          <section className="flex-1 flex items-center justify-center p-4 min-w-0">
+          <section className="w-full lg:flex-1 flex items-center justify-center p-4 lg:min-w-0">
             <Suspense fallback={<VideoPlayerSkeleton />}>
-              <VideoPlayer videoId={videoId} />
+              <VideoPlayer videoId={videoId} playlistId={playlistId} />
             </Suspense>
           </section>
 
           {/* Notes panel */}
-          <Suspense fallback={<div className="w-80 border-l border-gray-200 dark:border-gray-800" />}>
-            <Editor />
+          <Suspense fallback={<div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-800" />}>
+            <Editor videoId={typeof videoId === 'string' ? videoId : videoId?.[0]} />
           </Suspense>
         </div>
       </main>

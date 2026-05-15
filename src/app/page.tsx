@@ -18,6 +18,9 @@ export default function Home() {
 
       {/* Input */}
       <div className="w-full max-w-2xl flex flex-col gap-3">
+        <p className="text-sm text-gray-500 dark:text-gray-400">
+          Paste a YouTube video or playlist link to watch it distraction-free.
+        </p>
         <VideoUrlInput />
       </div>
 

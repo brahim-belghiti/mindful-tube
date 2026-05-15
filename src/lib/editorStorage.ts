@@ -1,6 +1,10 @@
 const STORAGE_KEY = 'editor-content';
 const PANEL_STATE_KEY = 'editor-panel-state';
 
+function contentKey(videoId?: string) {
+  return videoId ? `${STORAGE_KEY}-${videoId}` : STORAGE_KEY;
+}
+
 export interface PanelState {
   width: number;
   isExpanded: boolean;
@@ -13,19 +17,19 @@ const DEFAULT_PANEL_STATE: PanelState = {
   isPinned: false,
 };
 
-export function getStoredContent(): string | null {
+export function getStoredContent(videoId?: string): string | null {
   if (typeof window === 'undefined') return null;
-  return localStorage.getItem(STORAGE_KEY);
+  return localStorage.getItem(contentKey(videoId));
 }
 
-export function saveContent(content: string): void {
+export function saveContent(content: string, videoId?: string): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem(STORAGE_KEY, content);
+  localStorage.setItem(contentKey(videoId), content);
 }
 
-export function clearStoredContent(): void {
+export function clearStoredContent(videoId?: string): void {
   if (typeof window === 'undefined') return;
-  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(contentKey(videoId));
 }
 
 export function getPanelState(): PanelState {
