@@ -5,7 +5,7 @@ import ThemeToggle from '@/components/themeToggle';
 export default function Home() {
   return (
     <main className="w-full min-h-full flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-xl bg-white dark:bg-[#14151c] rounded-2xl shadow-md p-8 flex flex-col gap-10">
+      <div className="w-full max-w-4xl bg-white dark:bg-[#14151c] rounded-2xl shadow-md p-8 flex flex-col gap-10">
         {/* Hero */}
         <div className="flex flex-col items-start gap-2">
           <div className="flex items-center justify-between w-full">

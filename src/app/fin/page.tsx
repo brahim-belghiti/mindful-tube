@@ -14,7 +14,7 @@ export default async function FinPage({
 
   return (
     <main className="w-full min-h-full flex flex-col justify-center items-center p-4">
-      <div className="w-full max-w-xl bg-white dark:bg-[#14151c] rounded-2xl shadow-md p-8 flex flex-col gap-10">
+      <div className="w-full max-w-4xl bg-white dark:bg-[#14151c] rounded-2xl shadow-md p-8 flex flex-col gap-10">
         {/* Header row */}
         <div className="flex items-start justify-between">
           <div className="flex flex-col gap-2">
