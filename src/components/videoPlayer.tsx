@@ -42,11 +42,11 @@ export default function VideoPlayer({ videoId, playlistId }: TProps) {
   }, [isCompleted, router, validVideoId]);
 
   return (
-    <div className="w-full aspect-video max-h-[calc(100vh-4rem)]">
+    <div className="w-full aspect-video max-h-full">
       <YouTube
         videoId={validVideoId ?? ''}
         opts={videoOptions}
-        iframeClassName="w-full h-full rounded-lg"
+        iframeClassName="w-full h-full"
         className="w-full h-full"
         onReady={(e) => {
           playerRef.current = e.target;

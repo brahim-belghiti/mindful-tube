@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import SwRegister from '@/components/swRegister';
+import { ThemeProvider } from '@/lib/themeContext';
 import './globals.css';
 
 const inter = Inter({
@@ -27,10 +28,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`${inter.variable} container mx-auto h-screen antialiased`}>
+    <html lang="en" suppressHydrationWarning>
+      <head>
+        {/* Runs before paint to prevent flash of wrong theme */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{const t=localStorage.getItem('theme');const p=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.classList.toggle('dark',(t??p)==='dark')}catch{}`,
+          }}
+        />
+      </head>
+      <body className={`${inter.variable} h-screen antialiased bg-[#eaecf4] dark:bg-[#0c0d12]`}>
         <SwRegister />
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );

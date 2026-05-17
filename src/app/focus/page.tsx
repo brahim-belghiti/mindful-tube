@@ -1,6 +1,5 @@
 import { Suspense } from 'react';
 import dynamic from 'next/dynamic';
-import Link from 'next/link';
 import VideoPlayerSkeleton from '@/components/videoPlayerSkeleton';
 import FocusLayout from '@/components/focusLayout';
 
@@ -20,31 +19,20 @@ export default async function Page({
 
   return (
     <FocusLayout>
-      <main className="flex flex-col w-full min-h-screen lg:h-screen lg:overflow-hidden">
-        {/* Top bar */}
-        <header className="flex items-center px-4 py-2 border-b border-gray-200 dark:border-gray-800 shrink-0">
-          <Link
-            href="/"
-            className="text-sm font-semibold text-orange-500 hover:text-orange-600 dark:text-orange-400 dark:hover:text-orange-300 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
-          >
-            Mindful Tube
-          </Link>
-        </header>
-
-        {/* Content: stacked on mobile, side-by-side on desktop */}
-        <div className="flex flex-col lg:flex-row flex-1 lg:overflow-hidden">
-          {/* Video area */}
-          <section className="w-full lg:flex-1 flex items-center justify-center p-4 lg:min-w-0">
-            <Suspense fallback={<VideoPlayerSkeleton />}>
-              <VideoPlayer videoId={videoId} playlistId={playlistId} />
-            </Suspense>
-          </section>
-
-          {/* Notes panel */}
-          <Suspense fallback={<div className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-gray-200 dark:border-gray-800" />}>
-            <Editor videoId={typeof videoId === 'string' ? videoId : videoId?.[0]} />
+      <main className="flex flex-col lg:flex-row w-full h-screen p-3 gap-3 bg-[#eaecf4] dark:bg-[#0c0d12] overflow-hidden">
+        {/* Video card */}
+        <section className="flex-1 flex items-center justify-center bg-black rounded-2xl overflow-hidden min-w-0 shadow-md">
+          <Suspense fallback={<VideoPlayerSkeleton />}>
+            <VideoPlayer videoId={videoId} playlistId={playlistId} />
           </Suspense>
-        </div>
+        </section>
+
+        {/* Notes card */}
+        <Suspense fallback={
+          <div className="w-80 rounded-2xl bg-white dark:bg-[#14151c] shadow-md shrink-0" />
+        }>
+          <Editor videoId={typeof videoId === 'string' ? videoId : videoId?.[0]} />
+        </Suspense>
       </main>
     </FocusLayout>
   );

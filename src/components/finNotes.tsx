@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { getStoredContent } from '@/lib/editorStorage';
 import { marked } from 'marked';
+import { sanitizeHtml } from '@/lib/sanitize';
 
 export default function FinNotes({ videoId }: { videoId?: string }) {
   const [html, setHtml] = useState('');
@@ -10,8 +11,8 @@ export default function FinNotes({ videoId }: { videoId?: string }) {
   useEffect(() => {
     const content = getStoredContent(videoId);
     if (!content?.trim()) return;
-    const rendered = marked.parse(content);
-    if (typeof rendered === 'string') setHtml(rendered);
+    const rendered = marked.parse(content) as string;
+    setHtml(sanitizeHtml(rendered));
   }, [videoId]);
 
   if (!html) return null;

@@ -14,8 +14,13 @@ import {
   Save,
   AlertTriangle,
   Timer,
+  Home,
+  Sun,
+  Moon,
 } from 'lucide-react';
+import { useTheme } from '@/lib/themeContext';
 import { cn } from '@/lib/utils';
+import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { getStoredContent, saveContent, clearStoredContent, getPanelState, savePanelState } from '@/lib/editorStorage';
 import { useVideoContext, formatTimestamp } from '@/lib/videoContext';
@@ -26,19 +31,18 @@ import { MDXEditorMethods } from '@mdxeditor/editor';
 const Editor = dynamic(() => import('./mdxEditor'), {
   ssr: false,
   loading: () => (
-    <div className="animate-pulse h-full w-full bg-gray-200 dark:bg-gray-700 rounded-lg" />
+    <div className="animate-pulse h-full w-full bg-gray-100 dark:bg-gray-800 rounded-lg" />
   ),
 });
 
 const DEBOUNCE_DELAY = 500;
 const TOAST_DURATION = 3000;
-const MIN_WIDTH = 300;
-const MAX_WIDTH = 800;
+const MIN_WIDTH = 280;
+const MAX_WIDTH = 820;
 
 const STARTING_TEMPLATE = `## Notes
 
 `;
-
 
 type ToastType = 'success' | 'error' | 'info';
 
@@ -67,6 +71,7 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
   const isDraggingRef = useRef(false);
   const editorRef = useRef<MDXEditorMethods>(null);
   const { getCurrentTime } = useVideoContext();
+  const { theme, toggle: toggleTheme } = useTheme();
 
   const showToast = useCallback((message: string, type: ToastType = 'success') => {
     setToast({ message, type });
@@ -75,10 +80,7 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
 
   const debouncedSave = useCallback((content: string) => {
     setIsSaving(true);
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
-
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     debounceTimerRef.current = setTimeout(() => {
       saveContent(content, videoId);
       setLastSaved(new Date());
@@ -92,9 +94,7 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
   }, [debouncedSave]);
 
   const forceSave = useCallback(() => {
-    if (debounceTimerRef.current) {
-      clearTimeout(debounceTimerRef.current);
-    }
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     saveContent(markdown, videoId);
     setLastSaved(new Date());
     setIsSaving(false);
@@ -103,9 +103,7 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
 
   useEffect(() => {
     return () => {
-      if (debounceTimerRef.current) {
-        clearTimeout(debounceTimerRef.current);
-      }
+      if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
   }, []);
 
@@ -117,23 +115,10 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
     const handleKeyDown = (e: KeyboardEvent) => {
       const isMac = navigator.platform.toUpperCase().includes('MAC');
       const modifier = isMac ? e.metaKey : e.ctrlKey;
-
-      if (modifier && e.key === 's') {
-        e.preventDefault();
-        forceSave();
-      }
-
-      if (modifier && e.key === 'e') {
-        e.preventDefault();
-        setIsExpanded((prev) => !prev);
-      }
-
-      if (modifier && e.key === 'p') {
-        e.preventDefault();
-        setIsPreview((prev) => !prev);
-      }
+      if (modifier && e.key === 's') { e.preventDefault(); forceSave(); }
+      if (modifier && e.key === 'e') { e.preventDefault(); setIsExpanded((p) => !p); }
+      if (modifier && e.key === 'p') { e.preventDefault(); setIsPreview((p) => !p); }
     };
-
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [forceSave]);
@@ -144,13 +129,11 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
       const newWidth = Math.min(Math.max(window.innerWidth - e.clientX, MIN_WIDTH), MAX_WIDTH);
       setWidth(newWidth);
     };
-
     const handleMouseUp = () => {
       isDraggingRef.current = false;
       document.body.style.cursor = '';
       document.body.style.userSelect = '';
     };
-
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUp);
     return () => {
@@ -176,7 +159,7 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
     setLastSaved(null);
     setConfirmClear(false);
     showToast('Notes cleared', 'info');
-  }, [confirmClear, showToast]);
+  }, [confirmClear, videoId, showToast]);
 
   const handleInsertTimestamp = useCallback(() => {
     const seconds = getCurrentTime();
@@ -186,26 +169,17 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
   }, [getCurrentTime]);
 
   const handleCopy = useCallback(async () => {
-    if (!markdown.trim()) {
-      showToast('Nothing to copy', 'info');
-      return;
-    }
-
+    if (!markdown.trim()) { showToast('Nothing to copy', 'info'); return; }
     try {
       await navigator.clipboard.writeText(markdown);
-      showToast('Copied to clipboard!', 'success');
-    } catch (err) {
-      console.error('Failed to copy text:', err);
+      showToast('Copied!', 'success');
+    } catch {
       showToast('Failed to copy', 'error');
     }
   }, [markdown, showToast]);
 
   const handleExport = useCallback(() => {
-    if (!markdown.trim()) {
-      showToast('Nothing to export', 'info');
-      return;
-    }
-
+    if (!markdown.trim()) { showToast('Nothing to export', 'info'); return; }
     const blob = new Blob([markdown], { type: 'text/markdown' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -215,183 +189,101 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
-    showToast('Notes exported!', 'success');
+    showToast('Exported!', 'success');
   }, [markdown, showToast]);
 
   const wordCount = markdown.trim() ? markdown.trim().split(/\s+/).length : 0;
   const charCount = markdown.length;
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  };
+  const formatTime = (date: Date) =>
+    date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  const renderedMarkdown = useMemo(() => {
-    return marked.parse(markdown);
-  }, [markdown]);
+  const renderedMarkdown = useMemo(() => marked.parse(markdown), [markdown]);
 
   return (
     <>
       <section
         className={cn(
-          'relative transition-all duration-200',
-          'bg-white dark:bg-gray-900',
-          'flex flex-col shrink-0',
+          'relative flex flex-col shrink-0',
+          'bg-white dark:bg-[#14151c]',
+          'shadow-md',
           isMobile
-            ? 'w-full border-t border-orange-300/50 dark:border-orange-500/30'
+            ? 'w-full rounded-2xl'
             : cn(
-                'h-full border-l border-orange-300/50 dark:border-orange-500/30',
+                'h-full rounded-2xl overflow-hidden',
                 isExpanded ? 'w-[44px]' : ''
               )
         )}
         style={!isMobile && !isExpanded ? { width: `${width}px` } : undefined}
       >
+        {/* Resize handle */}
+        {!isMobile && !isExpanded && (
+          <div
+            className="absolute top-8 bottom-8 left-0 w-1.5 cursor-col-resize z-10 rounded-full hover:bg-black/10 dark:hover:bg-white/10 transition-colors duration-150"
+            onMouseDown={handleMouseDown}
+          />
+        )}
+
         {/* Header */}
         <div
           className={cn(
-            'flex items-center px-2 py-2 gap-1',
-            'border-b border-gray-200 dark:border-gray-700/50',
-            'bg-gradient-to-r from-orange-50/50 to-transparent dark:from-orange-950/20 dark:to-transparent',
-            'shrink-0',
-            isExpanded ? 'flex-col justify-center' : 'justify-between'
+            'flex items-center px-3 py-2.5 shrink-0 border-b border-gray-100/80 dark:border-white/5',
+            isExpanded ? 'flex-col justify-center gap-2' : 'justify-between'
           )}
         >
-          {/* Collapse toggle — always visible */}
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
-            className={cn(
-              'p-1.5 rounded-lg transition-all',
-              'hover:bg-gray-100 dark:hover:bg-gray-800',
-              'text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400'
-            )}
-            aria-label={isExpanded ? 'Expand notes' : 'Collapse notes'}
-            title={isExpanded ? 'Expand (Ctrl+E)' : 'Collapse (Ctrl+E)'}
-          >
-            {isExpanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}
-          </button>
-
+          {/* Notes chip label */}
           {!isExpanded && (
-            <>
-              <div className="flex items-center gap-2 min-w-0">
-                <FileText className="w-4 h-4 text-orange-500 shrink-0" />
-                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate">
-                  Notes
-                </h3>
-                <span className="text-xs text-gray-500 dark:text-gray-400 shrink-0">
-                  {wordCount}w
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-400 select-none">
+                <FileText size={11} className="text-gray-500 dark:text-gray-400" />
+                Notes
+                {wordCount > 0 && (
+                  <span className="ml-0.5 text-gray-400 dark:text-gray-500">{wordCount}w</span>
+                )}
+              </div>
+              {(isSaving || lastSaved) && (
+                <span className={cn('text-[10px]', isSaving ? 'text-gray-400' : 'text-green-500 dark:text-green-400')}>
+                  {isSaving ? 'saving…' : `saved ${formatTime(lastSaved!)}`}
                 </span>
-              </div>
-
-              <div className="flex items-center gap-0.5">
-                <button
-                  onClick={handleInsertTimestamp}
-                  className={cn(
-                    'flex items-center gap-1 px-2 py-1 rounded-lg transition-all text-xs font-medium',
-                    'bg-orange-50 dark:bg-orange-950/30',
-                    'text-orange-600 dark:text-orange-400',
-                    'hover:bg-orange-100 dark:hover:bg-orange-900/40',
-                    'border border-orange-200 dark:border-orange-800'
-                  )}
-                  aria-label="Insert current video timestamp"
-                  title="Insert timestamp at cursor"
-                >
-                  <Timer size={12} />
-                  <span>Timestamp</span>
-                </button>
-
-                <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-0.5" />
-
-                <button
-                  onClick={() => setIsPreview(!isPreview)}
-                  className={cn(
-                    'p-1.5 rounded-lg transition-all',
-                    'hover:bg-gray-100 dark:hover:bg-gray-800',
-                    isPreview
-                      ? 'text-orange-500 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/30'
-                      : 'text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400'
-                  )}
-                  aria-label={isPreview ? 'Switch to edit mode' : 'Switch to preview mode'}
-                  title={isPreview ? 'Edit (Ctrl+P)' : 'Preview (Ctrl+P)'}
-                >
-                  {isPreview ? <Pencil size={14} /> : <Eye size={14} />}
-                </button>
-
-                <div className="w-px h-4 bg-gray-300 dark:bg-gray-600 mx-0.5" />
-
-                <button
-                  onClick={forceSave}
-                  className={cn(
-                    'p-1.5 rounded-lg transition-all',
-                    'hover:bg-gray-100 dark:hover:bg-gray-800',
-                    'text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400'
-                  )}
-                  aria-label="Save notes"
-                  title="Save (Ctrl+S)"
-                >
-                  <Save size={14} />
-                </button>
-
-                <button
-                  onClick={handleCopy}
-                  className={cn(
-                    'p-1.5 rounded-lg transition-all',
-                    'hover:bg-gray-100 dark:hover:bg-gray-800',
-                    'text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400'
-                  )}
-                  aria-label="Copy notes"
-                  title="Copy"
-                >
-                  <Copy size={14} />
-                </button>
-
-                <button
-                  onClick={handleExport}
-                  className={cn(
-                    'p-1.5 rounded-lg transition-all',
-                    'hover:bg-gray-100 dark:hover:bg-gray-800',
-                    'text-gray-600 dark:text-gray-400 hover:text-orange-500 dark:hover:text-orange-400'
-                  )}
-                  aria-label="Export notes"
-                  title="Export as markdown"
-                >
-                  <Download size={14} />
-                </button>
-
-                <button
-                  onClick={handleClearNotes}
-                  className={cn(
-                    'p-1.5 rounded-lg transition-all',
-                    confirmClear
-                      ? 'bg-red-100 dark:bg-red-950/50 text-red-600 dark:text-red-400'
-                      : 'hover:bg-red-50 dark:hover:bg-red-950/30 text-gray-600 dark:text-gray-400 hover:text-red-500 dark:hover:text-red-400'
-                  )}
-                  aria-label={confirmClear ? 'Click again to confirm clear' : 'Clear all notes'}
-                  title={confirmClear ? 'Click again to confirm' : 'Clear notes'}
-                >
-                  {confirmClear ? <AlertTriangle size={14} /> : <Trash2 size={14} />}
-                </button>
-              </div>
-            </>
+              )}
+            </div>
           )}
+
+          {/* Right side: home + theme toggle + collapse */}
+          <div className={cn('flex items-center gap-1', isExpanded && 'flex-col')}>
+            {!isExpanded && (
+              <Link
+                href="/"
+                className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/8 transition-all"
+                title="Home"
+                aria-label="Go home"
+              >
+                <Home size={13} />
+              </Link>
+            )}
+            <button
+              onClick={toggleTheme}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/8 transition-all"
+              aria-label="Toggle theme"
+              title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            >
+              {theme === 'dark' ? <Sun size={13} /> : <Moon size={13} />}
+            </button>
+            <button
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-white/8 transition-all"
+              aria-label={isExpanded ? 'Expand notes' : 'Collapse notes'}
+              title={isExpanded ? 'Expand (Ctrl+E)' : 'Collapse (Ctrl+E)'}
+            >
+              {isExpanded ? <ChevronLeft size={13} /> : <ChevronRight size={13} />}
+            </button>
+          </div>
         </div>
 
-        {/* Resize handle — desktop sidebar only */}
-        {!isMobile && !isExpanded && (
-          <div
-            className={cn(
-              'absolute top-0 left-0 h-full w-1 cursor-col-resize group z-10',
-              'hover:bg-orange-400/40 dark:hover:bg-orange-500/40',
-              'transition-colors duration-150'
-            )}
-            onMouseDown={handleMouseDown}
-          >
-            <div className="absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 bg-orange-400/50 dark:bg-orange-500/50 opacity-0 group-hover:opacity-100 transition-opacity" />
-          </div>
-        )}
-
-        {/* Editor Content */}
+        {/* Editor content */}
         <div
           className={cn(
-            'flex-1 flex flex-col overflow-hidden transition-all duration-200 min-h-0',
+            'flex-1 flex flex-col overflow-hidden min-h-0 transition-all duration-200',
             isExpanded ? 'hidden' : 'opacity-100'
           )}
         >
@@ -405,44 +297,97 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
             )}
           </div>
 
-          {/* Footer Status Bar */}
-          <div className="flex items-center justify-between px-3 py-1.5 border-t border-gray-200 dark:border-gray-700/50 bg-gray-50/50 dark:bg-gray-800/30 shrink-0">
-            <div className="flex items-center gap-3 text-xs text-gray-500 dark:text-gray-400">
-              <span>{wordCount} words</span>
-              <span>{charCount} chars</span>
+          {/* Bottom toolbar */}
+          <div className="flex items-center justify-between px-2.5 py-2 border-t border-gray-100/80 dark:border-white/5 bg-gray-50/40 dark:bg-white/[0.02] shrink-0 gap-1.5">
+            {/* Left: timestamp + char count */}
+            <div className="flex items-center gap-1">
+              <button
+                onClick={handleInsertTimestamp}
+                className="flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-700 hover:text-gray-800 dark:hover:text-gray-200 transition-all"
+                title="Insert timestamp"
+              >
+                <Timer size={10} />
+                Timestamp
+              </button>
+              <span className="text-[10px] text-gray-400 dark:text-gray-600 pl-1">{charCount}c</span>
             </div>
 
-            <div className="flex items-center gap-2 text-xs">
-              {isSaving && (
-                <span className="text-gray-500 dark:text-gray-400">
-                  Saving...
-                </span>
-              )}
-              {lastSaved && !isSaving && (
-                <span className="text-green-600 dark:text-green-400">
-                  Saved {formatTime(lastSaved)}
-                </span>
-              )}
+            {/* Right: action icon buttons */}
+            <div className="flex items-center gap-0.5">
+              <button
+                onClick={() => setIsPreview(!isPreview)}
+                className={cn(
+                  'p-1.5 rounded-lg transition-all text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800',
+                  isPreview && 'text-indigo-500 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/30'
+                )}
+                title={isPreview ? 'Edit (Ctrl+P)' : 'Preview (Ctrl+P)'}
+                aria-label={isPreview ? 'Edit mode' : 'Preview mode'}
+              >
+                {isPreview ? <Pencil size={13} /> : <Eye size={13} />}
+              </button>
+
+              <div className="w-px h-3.5 bg-gray-200 dark:bg-gray-700 mx-0.5" />
+
+              <button
+                onClick={forceSave}
+                className="p-1.5 rounded-lg transition-all text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                title="Save (Ctrl+S)"
+                aria-label="Save notes"
+              >
+                <Save size={13} />
+              </button>
+              <button
+                onClick={handleCopy}
+                className="p-1.5 rounded-lg transition-all text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                title="Copy"
+                aria-label="Copy notes"
+              >
+                <Copy size={13} />
+              </button>
+              <button
+                onClick={handleExport}
+                className="p-1.5 rounded-lg transition-all text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                title="Export as .md"
+                aria-label="Export notes"
+              >
+                <Download size={13} />
+              </button>
+
+              <div className="w-px h-3.5 bg-gray-200 dark:bg-gray-700 mx-0.5" />
+
+              <button
+                onClick={handleClearNotes}
+                className={cn(
+                  'p-1.5 rounded-lg transition-all',
+                  confirmClear
+                    ? 'bg-red-50 dark:bg-red-950/40 text-red-500 dark:text-red-400'
+                    : 'text-gray-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/30'
+                )}
+                title={confirmClear ? 'Click again to confirm' : 'Clear notes'}
+                aria-label={confirmClear ? 'Confirm clear' : 'Clear notes'}
+              >
+                {confirmClear ? <AlertTriangle size={13} /> : <Trash2 size={13} />}
+              </button>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Toast Notification */}
+      {/* Toast */}
       {toast && (
         <div
           className={cn(
-            'fixed bottom-6 right-6 z-[100]',
-            'px-4 py-3 rounded-lg shadow-lg',
+            'fixed bottom-5 right-5 z-[100]',
+            'px-3.5 py-2.5 rounded-xl shadow-lg',
             'flex items-center gap-2',
             'animate-in slide-in-from-bottom-2 fade-in duration-200',
-            toast.type === 'success' && 'bg-green-500 text-white',
+            toast.type === 'success' && 'bg-gray-900 dark:bg-gray-100 text-white dark:text-gray-900',
             toast.type === 'error' && 'bg-red-500 text-white',
-            toast.type === 'info' && 'bg-gray-800 dark:bg-gray-700 text-white'
+            toast.type === 'info' && 'bg-gray-700 dark:bg-gray-200 text-white dark:text-gray-800'
           )}
         >
-          {toast.type === 'success' && <Check size={16} />}
-          <span className="text-sm font-medium">{toast.message}</span>
+          {toast.type === 'success' && <Check size={13} />}
+          <span className="text-xs font-medium">{toast.message}</span>
         </div>
       )}
     </>
