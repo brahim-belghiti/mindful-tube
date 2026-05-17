@@ -26,6 +26,7 @@ import { getStoredContent, saveContent, clearStoredContent, getPanelState, saveP
 import { useVideoContext, formatTimestamp } from '@/lib/videoContext';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { marked } from 'marked';
+import { sanitizeHtml } from '@/lib/sanitize';
 import { MDXEditorMethods } from '@mdxeditor/editor';
 
 const Editor = dynamic(() => import('./mdxEditor'), {
@@ -198,7 +199,10 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
   const formatTime = (date: Date) =>
     date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  const renderedMarkdown = useMemo(() => marked.parse(markdown), [markdown]);
+  const renderedMarkdown = useMemo(
+    () => sanitizeHtml(marked.parse(markdown) as string),
+    [markdown]
+  );
 
   return (
     <>

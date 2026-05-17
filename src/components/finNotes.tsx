@@ -18,10 +18,12 @@ export default function FinNotes({ videoId }: { videoId?: string }) {
   if (!html) return null;
 
   return (
-    <div className="w-full max-w-2xl flex flex-col gap-4 border-t border-gray-200 dark:border-gray-800 pt-10">
-      <h2 className="text-lg font-semibold">Your notes</h2>
+    <div className="flex flex-col gap-3 border-t border-gray-100 dark:border-white/5 pt-6">
+      <h2 className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+        Your notes
+      </h2>
       <div
-        className="prose prose-sm dark:prose-invert max-w-none text-gray-700 dark:text-gray-300"
+        className="prose prose-sm dark:prose-invert max-w-none"
         dangerouslySetInnerHTML={{ __html: html }}
       />
     </div>

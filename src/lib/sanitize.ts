@@ -1,7 +1,7 @@
 import DOMPurify from 'dompurify';
 
 // Allow standard formatting and links; strip everything executable.
-const CONFIG: DOMPurify.Config = {
+const CONFIG = {
   ALLOWED_TAGS: [
     'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
     'p', 'br', 'hr',
