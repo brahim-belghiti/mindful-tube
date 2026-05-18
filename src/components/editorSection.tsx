@@ -23,7 +23,7 @@ import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { getStoredContent, saveContent, clearStoredContent, getPanelState, savePanelState } from '@/lib/editorStorage';
-import { useVideoContext, formatTimestamp } from '@/lib/videoContext';
+import { useVideoContext, formatTimestamp, parseTimestamp } from '@/lib/videoContext';
 import { useIsMobile } from '@/lib/useIsMobile';
 import { marked } from 'marked';
 import { sanitizeHtml } from '@/lib/sanitize';
@@ -72,7 +72,7 @@ export default function EditorSection({ videoId, title }: EditorSectionProps) {
   const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
   const isDraggingRef = useRef(false);
   const editorRef = useRef<MDXEditorMethods>(null);
-  const { getCurrentTime } = useVideoContext();
+  const { getCurrentTime, seekTo, playlist } = useVideoContext();
   const { theme, toggle: toggleTheme } = useTheme();
 
   const showToast = useCallback((message: string, type: ToastType = 'success') => {
@@ -203,10 +203,23 @@ export default function EditorSection({ videoId, title }: EditorSectionProps) {
   const formatTime = (date: Date) =>
     date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
 
-  const renderedMarkdown = useMemo(
-    () => sanitizeHtml(marked.parse(markdown) as string),
-    [markdown]
-  );
+  const renderedMarkdown = useMemo(() => {
+    const raw = marked.parse(markdown) as string;
+    const sanitized = sanitizeHtml(raw);
+    // Wrap timestamp patterns like [1:23] or [1:23:45] in clickable buttons
+    return sanitized.replace(
+      /\[(\d{1,2}:\d{2}(?::\d{2})?)\]/g,
+      (_, ts) =>
+        `<button class="ts-link" data-ts="${ts}" title="Seek to ${ts}" type="button">[${ts}]</button>`
+    );
+  }, [markdown]);
+
+  const handlePreviewClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.ts-link');
+    if (!btn) return;
+    const seconds = parseTimestamp(btn.dataset.ts ?? '');
+    seekTo(seconds);
+  }, [seekTo]);
 
   return (
     <>
@@ -252,6 +265,11 @@ export default function EditorSection({ videoId, title }: EditorSectionProps) {
               {title && (
                 <span className="text-xs text-gray-400 dark:text-gray-500 truncate" title={title}>
                   {title}
+                </span>
+              )}
+              {playlist && (
+                <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-gray-100 dark:bg-white/5 text-gray-400 dark:text-gray-500 shrink-0">
+                  {playlist.index + 1} / {playlist.total}
                 </span>
               )}
               {(isSaving || lastSaved) && (
@@ -315,7 +333,10 @@ export default function EditorSection({ videoId, title }: EditorSectionProps) {
         >
           <div className="flex-1 overflow-y-auto">
             {isPreview ? (
-              <div className="p-4 prose prose-sm dark:prose-invert max-w-none">
+              <div
+                className="p-4 prose prose-sm dark:prose-invert max-w-none"
+                onClick={handlePreviewClick}
+              >
                 <div dangerouslySetInnerHTML={{ __html: renderedMarkdown }} />
               </div>
             ) : (

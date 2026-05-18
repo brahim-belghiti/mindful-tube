@@ -1,16 +1,27 @@
 'use client';
 
-import { createContext, useContext, useRef, useCallback } from 'react';
+import { createContext, useContext, useRef, useCallback, useState } from 'react';
+
+export interface PlaylistInfo {
+  index: number;  // 0-based
+  total: number;
+}
 
 interface VideoContextValue {
   registerGetTime: (fn: () => number) => void;
   getCurrentTime: () => number;
+  registerSeekTo: (fn: (seconds: number) => void) => void;
+  seekTo: (seconds: number) => void;
+  playlist: PlaylistInfo | null;
+  setPlaylist: (info: PlaylistInfo | null) => void;
 }
 
 const VideoContext = createContext<VideoContextValue | null>(null);
 
 export function VideoProvider({ children }: { children: React.ReactNode }) {
   const getTimeFnRef = useRef<(() => number) | null>(null);
+  const seekToFnRef = useRef<((seconds: number) => void) | null>(null);
+  const [playlist, setPlaylist] = useState<PlaylistInfo | null>(null);
 
   const registerGetTime = useCallback((fn: () => number) => {
     getTimeFnRef.current = fn;
@@ -20,8 +31,16 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     return getTimeFnRef.current?.() ?? 0;
   }, []);
 
+  const registerSeekTo = useCallback((fn: (seconds: number) => void) => {
+    seekToFnRef.current = fn;
+  }, []);
+
+  const seekTo = useCallback((seconds: number) => {
+    seekToFnRef.current?.(seconds);
+  }, []);
+
   return (
-    <VideoContext.Provider value={{ registerGetTime, getCurrentTime }}>
+    <VideoContext.Provider value={{ registerGetTime, getCurrentTime, registerSeekTo, seekTo, playlist, setPlaylist }}>
       {children}
     </VideoContext.Provider>
   );
@@ -41,4 +60,13 @@ export function formatTimestamp(seconds: number): string {
     return `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
   }
   return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+// Parse "1:23" or "1:23:45" back to seconds
+export function parseTimestamp(ts: string): number {
+  const parts = ts.split(':').map(Number);
+  if (parts.some(isNaN)) return 0;
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return 0;
 }

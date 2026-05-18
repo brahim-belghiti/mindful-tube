@@ -17,14 +17,17 @@ export default function VideoPlayer({ videoId, playlistId, onTitleLoad }: TProps
   const [isCompleted, setIsCompleted] = useState(false);
   const playerRef = useRef<YouTubeEvent['target'] | null>(null);
   const router = useRouter();
-  const { registerGetTime } = useVideoContext();
+  const { registerGetTime, registerSeekTo, setPlaylist } = useVideoContext();
 
   const validVideoId = Array.isArray(videoId) ? videoId[0] : videoId;
   const validPlaylistId = Array.isArray(playlistId) ? playlistId[0] : playlistId;
 
   useEffect(() => {
     registerGetTime(() => playerRef.current?.getCurrentTime() ?? 0);
-  }, [registerGetTime]);
+    registerSeekTo((seconds: number) => {
+      playerRef.current?.seekTo(seconds, true);
+    });
+  }, [registerGetTime, registerSeekTo]);
 
   const videoOptions: YouTubeProps['opts'] = {
     width: '100%',
@@ -43,13 +46,32 @@ export default function VideoPlayer({ videoId, playlistId, onTitleLoad }: TProps
     }
   }, [isCompleted, router, validVideoId]);
 
+  const updatePlaylistState = () => {
+    const player = playerRef.current;
+    if (!player) return;
+    try {
+      const list = player.getPlaylist();
+      if (Array.isArray(list) && list.length > 1) {
+        setPlaylist({ index: player.getPlaylistIndex(), total: list.length });
+      } else {
+        setPlaylist(null);
+      }
+    } catch {
+      setPlaylist(null);
+    }
+  };
+
   const handleReady = async (e: YouTubeEvent) => {
     playerRef.current = e.target;
+    updatePlaylistState();
     if (!validVideoId) return;
-
     const title = await fetchVideoTitle(validVideoId);
     recordWatch(validVideoId, title ?? undefined);
     if (title) onTitleLoad?.(title);
+  };
+
+  const handleStateChange = () => {
+    updatePlaylistState();
   };
 
   return (
@@ -60,6 +82,7 @@ export default function VideoPlayer({ videoId, playlistId, onTitleLoad }: TProps
         iframeClassName="w-full h-full"
         className="w-full h-full"
         onReady={handleReady}
+        onStateChange={handleStateChange}
         onEnd={() => { if (!validPlaylistId) setIsCompleted(true); }}
       />
     </div>

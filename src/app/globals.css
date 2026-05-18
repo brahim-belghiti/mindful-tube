@@ -100,6 +100,35 @@ body {
   color: #4b5563;
 }
 
+/* ─── Clickable timestamps in preview ────────────────────────────────────── */
+
+button.ts-link {
+  display: inline;
+  font: inherit;
+  font-weight: 600;
+  color: #f97316;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: transparent;
+  transition: text-decoration-color 0.15s;
+}
+
+button.ts-link:hover {
+  text-decoration-color: #f97316;
+}
+
+.dark button.ts-link {
+  color: #fb923c;
+}
+
+.dark button.ts-link:hover {
+  text-decoration-color: #fb923c;
+}
+
 /* ─── Animations ──────────────────────────────────────────────────────────── */
 
 @keyframes slideInFromBottom {
