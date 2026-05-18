@@ -13,7 +13,7 @@ export default async function FinPage({
   const videoId = typeof resolved?.id === 'string' ? resolved.id : undefined;
 
   return (
-    <main className="w-full min-h-full flex flex-col justify-center items-center p-4">
+    <main className="w-full h-full overflow-y-auto flex flex-col items-center py-8 px-4">
       <div className="w-full max-w-4xl bg-white dark:bg-[#14151c] rounded-2xl shadow-md p-8 flex flex-col gap-10">
         {/* Header row */}
         <div className="flex items-start justify-between">

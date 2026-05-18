@@ -37,7 +37,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body className={`${inter.variable} h-screen antialiased bg-[#eaecf4] dark:bg-[#0c0d12]`}>
+      <body className={`${inter.variable} h-screen overflow-hidden antialiased bg-[#eaecf4] dark:bg-[#0c0d12]`}>
         <SwRegister />
         <ThemeProvider>{children}</ThemeProvider>
       </body>
