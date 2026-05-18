@@ -5,13 +5,15 @@ import { useEffect, useRef, useState } from 'react';
 import YouTube, { YouTubeEvent, YouTubeProps } from 'react-youtube';
 import { useVideoContext } from '@/lib/videoContext';
 import { recordWatch } from '@/lib/watchHistory';
+import { fetchVideoTitle } from '@/lib/youtube';
 
 type TProps = {
   videoId: string | string[] | undefined;
   playlistId?: string | string[] | undefined;
+  onTitleLoad?: (title: string) => void;
 };
 
-export default function VideoPlayer({ videoId, playlistId }: TProps) {
+export default function VideoPlayer({ videoId, playlistId, onTitleLoad }: TProps) {
   const [isCompleted, setIsCompleted] = useState(false);
   const playerRef = useRef<YouTubeEvent['target'] | null>(null);
   const router = useRouter();
@@ -41,6 +43,15 @@ export default function VideoPlayer({ videoId, playlistId }: TProps) {
     }
   }, [isCompleted, router, validVideoId]);
 
+  const handleReady = async (e: YouTubeEvent) => {
+    playerRef.current = e.target;
+    if (!validVideoId) return;
+
+    const title = await fetchVideoTitle(validVideoId);
+    recordWatch(validVideoId, title ?? undefined);
+    if (title) onTitleLoad?.(title);
+  };
+
   return (
     <div className="w-full aspect-video max-h-full">
       <YouTube
@@ -48,10 +59,7 @@ export default function VideoPlayer({ videoId, playlistId }: TProps) {
         opts={videoOptions}
         iframeClassName="w-full h-full"
         className="w-full h-full"
-        onReady={(e) => {
-          playerRef.current = e.target;
-          if (validVideoId) recordWatch(validVideoId);
-        }}
+        onReady={handleReady}
         onEnd={() => { if (!validPlaylistId) setIsCompleted(true); }}
       />
     </div>

@@ -54,9 +54,10 @@ interface Toast {
 
 interface EditorSectionProps {
   videoId?: string;
+  title?: string;
 }
 
-export default function EditorSection({ videoId }: EditorSectionProps) {
+export default function EditorSection({ videoId, title }: EditorSectionProps) {
   const initialPanelState = useMemo(() => getPanelState(), []);
   const isMobile = useIsMobile();
 
@@ -185,7 +186,10 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `notes-${new Date().toISOString().slice(0, 10)}.md`;
+    const slug = title
+      ? title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 50)
+      : new Date().toISOString().slice(0, 10);
+    a.download = `notes-${slug}.md`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -235,21 +239,39 @@ export default function EditorSection({ videoId }: EditorSectionProps) {
             isExpanded ? 'flex-col justify-center gap-2' : 'justify-between'
           )}
         >
-          {/* Notes chip label */}
+          {/* Notes chip + title */}
           {!isExpanded && (
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-400 select-none">
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-gray-100 dark:bg-gray-800 text-xs font-medium text-gray-600 dark:text-gray-400 select-none shrink-0">
                 <FileText size={11} className="text-gray-500 dark:text-gray-400" />
                 Notes
                 {wordCount > 0 && (
                   <span className="ml-0.5 text-gray-400 dark:text-gray-500">{wordCount}w</span>
                 )}
               </div>
+              {title && (
+                <span className="text-xs text-gray-400 dark:text-gray-500 truncate" title={title}>
+                  {title}
+                </span>
+              )}
               {(isSaving || lastSaved) && (
-                <span className={cn('text-[10px]', isSaving ? 'text-gray-400' : 'text-green-500 dark:text-green-400')}>
+                <span className={cn('text-[10px] shrink-0', isSaving ? 'text-gray-400' : 'text-green-500 dark:text-green-400')}>
                   {isSaving ? 'saving…' : `saved ${formatTime(lastSaved!)}`}
                 </span>
               )}
+            </div>
+          )}
+
+          {/* Collapsed vertical label */}
+          {isExpanded && (
+            <div className="flex flex-col items-center gap-1.5 py-2">
+              <FileText size={13} className="text-gray-400 dark:text-gray-500" />
+              <span
+                className="text-[10px] font-medium text-gray-400 dark:text-gray-500 tracking-widest uppercase"
+                style={{ writingMode: 'vertical-rl' }}
+              >
+                Notes
+              </span>
             </div>
           )}
 
