@@ -17,7 +17,7 @@ export default function VideoPlayer({ videoId, playlistId, onTitleLoad }: TProps
   const [isCompleted, setIsCompleted] = useState(false);
   const playerRef = useRef<YouTubeEvent['target'] | null>(null);
   const router = useRouter();
-  const { registerGetTime, registerSeekTo, setPlaylist } = useVideoContext();
+  const { registerGetTime, registerSeekTo, setPlaylist, registerNextVideo, registerPrevVideo } = useVideoContext();
 
   const validVideoId = Array.isArray(videoId) ? videoId[0] : videoId;
   const validPlaylistId = Array.isArray(playlistId) ? playlistId[0] : playlistId;
@@ -27,7 +27,13 @@ export default function VideoPlayer({ videoId, playlistId, onTitleLoad }: TProps
     registerSeekTo((seconds: number) => {
       playerRef.current?.seekTo(seconds, true);
     });
-  }, [registerGetTime, registerSeekTo]);
+    registerNextVideo(() => {
+      playerRef.current?.nextVideo();
+    });
+    registerPrevVideo(() => {
+      playerRef.current?.previousVideo();
+    });
+  }, [registerGetTime, registerSeekTo, registerNextVideo, registerPrevVideo]);
 
   const videoOptions: YouTubeProps['opts'] = {
     width: '100%',
