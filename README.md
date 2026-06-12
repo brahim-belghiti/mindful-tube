@@ -73,13 +73,10 @@ npm test
 
 
 
-![homepage](https://user-images.githubusercontent.com/91473510/196261828-404631b0-d639-40d4-958f-38f089a33a3d.png)
-![homepage dark](https://user-images.githubusercontent.com/91473510/196261941-81003729-c416-4572-89c2-0af2f3f8cfd3.png)
 <img width="1920" height="1080" alt="Screenshot From 2026-06-11 21-58-54" src="https://github.com/user-attachments/assets/a308a034-afec-4c93-a0a9-c532020e8163" />
 <img width="1920" height="1080" alt="Screenshot From 2026-06-11 21-57-28" src="https://github.com/user-attachments/assets/71be9bb3-6573-4485-98dd-35032bcd043a" />
 
 
-![done page](https://user-images.githubusercontent.com/91473510/175609692-85806950-fa61-4970-b57a-257588632141.png)
 
 ---
 
