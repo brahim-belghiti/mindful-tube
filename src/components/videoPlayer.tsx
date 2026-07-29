@@ -11,9 +11,11 @@ type TProps = {
   videoId: string | string[] | undefined;
   playlistId?: string | string[] | undefined;
   onTitleLoad?: (title: string) => void;
+  /** Takes over from the default "go to /fin" behaviour, e.g. to advance a list. */
+  onVideoEnd?: () => void;
 };
 
-export default function VideoPlayer({ videoId, playlistId, onTitleLoad }: TProps) {
+export default function VideoPlayer({ videoId, playlistId, onTitleLoad, onVideoEnd }: TProps) {
   const [isCompleted, setIsCompleted] = useState(false);
   const playerRef = useRef<YouTubeEvent['target'] | null>(null);
   const router = useRouter();
@@ -89,7 +91,10 @@ export default function VideoPlayer({ videoId, playlistId, onTitleLoad }: TProps
         className="w-full h-full"
         onReady={handleReady}
         onStateChange={handleStateChange}
-        onEnd={() => { if (!validPlaylistId) setIsCompleted(true); }}
+        onEnd={() => {
+          if (onVideoEnd) onVideoEnd();
+          else if (!validPlaylistId) setIsCompleted(true);
+        }}
       />
     </div>
   );

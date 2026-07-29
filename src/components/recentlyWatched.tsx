@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { getWatchHistory, clearWatchHistory, HistoryEntry } from '@/lib/watchHistory';
+import AddToList from '@/components/addToList';
 import { Trash2 } from 'lucide-react';
 
 function timeAgo(ts: number): string {
@@ -60,7 +61,10 @@ export default function RecentlyWatched() {
                 className="w-40 h-[90px] object-cover"
                 unoptimized
               />
-              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-end justify-end p-1.5">
+              <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-end justify-between gap-1 p-1.5">
+                <span className="opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
+                  <AddToList videoId={entry.videoId} title={entry.title} stopPropagation />
+                </span>
                 <span className="opacity-0 group-hover:opacity-100 transition-opacity text-white text-[10px] font-medium bg-black/60 px-1.5 py-0.5 rounded-md">
                   Watch again
                 </span>

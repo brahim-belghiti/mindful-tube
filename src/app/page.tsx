@@ -1,5 +1,6 @@
 import VideoUrlInput from '@/components/videoUrlInput';
 import RecentlyWatched from '@/components/recentlyWatched';
+import CollectionsSection from '@/components/collectionsSection';
 import ThemeToggle from '@/components/themeToggle';
 
 export default function Home() {
@@ -32,6 +33,8 @@ export default function Home() {
           </p>
           <VideoUrlInput />
         </div>
+
+        <CollectionsSection />
 
         <RecentlyWatched />
 

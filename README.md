@@ -10,6 +10,8 @@ Mindful Tube is a minimalist web app that lets you watch YouTube videos (and pla
 
 - **Distraction-free player** — no sidebar, no recommendations, no comments
 - **Playlist support** — paste a playlist URL and watch videos in order
+- **Your own lists** — build named lists of videos, drag to reorder them, and play them end to end. A deliberate queue you assembled, not a feed
+- **Add to a list from anywhere** — from the player while watching, or from your watch history on the home page
 - **Built-in markdown notes** — write notes alongside the video with a full MDX editor
 - **Clickable timestamps** — insert the current video timestamp into your notes; click it in preview to seek
 - **Auto-save** — notes are saved automatically to `localStorage`, keyed per video
