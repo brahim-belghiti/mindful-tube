@@ -5,6 +5,7 @@ import { createContext, useContext, useRef, useCallback, useState } from 'react'
 export interface PlaylistInfo {
   index: number;  // 0-based
   total: number;
+  videoIds: string[];
 }
 
 interface VideoContextValue {
@@ -16,6 +17,8 @@ interface VideoContextValue {
   nextVideo: () => void;
   registerPrevVideo: (fn: () => void) => void;
   prevVideo: () => void;
+  registerPlayVideoAt: (fn: (index: number) => void) => void;
+  playVideoAt: (index: number) => void;
   playlist: PlaylistInfo | null;
   setPlaylist: (info: PlaylistInfo | null) => void;
 }
@@ -27,6 +30,7 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
   const seekToFnRef = useRef<((seconds: number) => void) | null>(null);
   const nextVideoFnRef = useRef<(() => void) | null>(null);
   const prevVideoFnRef = useRef<(() => void) | null>(null);
+  const playVideoAtFnRef = useRef<((index: number) => void) | null>(null);
   const [playlist, setPlaylist] = useState<PlaylistInfo | null>(null);
 
   const registerGetTime = useCallback((fn: () => number) => {
@@ -61,8 +65,16 @@ export function VideoProvider({ children }: { children: React.ReactNode }) {
     prevVideoFnRef.current?.();
   }, []);
 
+  const registerPlayVideoAt = useCallback((fn: (index: number) => void) => {
+    playVideoAtFnRef.current = fn;
+  }, []);
+
+  const playVideoAt = useCallback((index: number) => {
+    playVideoAtFnRef.current?.(index);
+  }, []);
+
   return (
-    <VideoContext.Provider value={{ registerGetTime, getCurrentTime, registerSeekTo, seekTo, registerNextVideo, nextVideo, registerPrevVideo, prevVideo, playlist, setPlaylist }}>
+    <VideoContext.Provider value={{ registerGetTime, getCurrentTime, registerSeekTo, seekTo, registerNextVideo, nextVideo, registerPrevVideo, prevVideo, registerPlayVideoAt, playVideoAt, playlist, setPlaylist }}>
       {children}
     </VideoContext.Provider>
   );

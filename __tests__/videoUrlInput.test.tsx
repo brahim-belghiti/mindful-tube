@@ -1,36 +1,44 @@
 import { render, screen, fireEvent } from '@testing-library/react';
+import '@testing-library/jest-dom';
 import VideoUrlInput from '@/components/videoUrlInput';
-import { validYoutbeUrlLink } from '@/lib/utils';
 
-// Mock the validYoutbeUrlLink function
-jest.mock('@/lib/utils', () => ({
-  validYoutbeUrlLink: jest.fn(),
+const mockPush = jest.fn();
+
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({ push: mockPush }),
 }));
 
+beforeEach(() => {
+  mockPush.mockClear();
+});
+
+const submit = (value: string) => {
+  render(<VideoUrlInput />);
+  fireEvent.change(screen.getByPlaceholderText(/paste a youtube video or playlist/i), {
+    target: { value },
+  });
+  fireEvent.click(screen.getByRole('button', { name: /watch video/i }));
+};
+
 describe('VideoUrlInput', () => {
-  test('shows error message for invalid URL', () => {
-    (validYoutbeUrlLink as jest.Mock).mockReturnValue('');
-    
-    render(<VideoUrlInput />);
-    const inputElement = screen.getByPlaceholderText(/Paste your YouTube video link/i);
-    const buttonElement = screen.getByRole('button', { name: /Submit/i });
-    
-    fireEvent.change(inputElement, { target: { value: 'https://invalid-url' } });
-    fireEvent.click(buttonElement);
-    
-    expect(screen.getByText(/Invalid YouTube URL/i)).toBeInTheDocument();
+  test('shows an error and does not navigate for an invalid URL', () => {
+    submit('https://example.com/not-a-video');
+    expect(screen.getByRole('alert')).toHaveTextContent(/valid YouTube video or playlist URL/i);
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
-  test('shows success message for valid URL and triggers redirection', () => {
-    (validYoutbeUrlLink as jest.Mock).mockReturnValue('D55ctBYF3AY');
-    
-    render(<VideoUrlInput />);
-    const inputElement = screen.getByPlaceholderText(/Paste your YouTube video link/i);
-    const buttonElement = screen.getByRole('button', { name: /Submit/i });
-    
-    fireEvent.change(inputElement, { target: { value: 'https://www.youtube.com/watch?v=D55ctBYF3AY' } });
-    fireEvent.click(buttonElement);
-    
-    expect(screen.getByText(/valid YouTube URL. You will be redirected shortly/i)).toBeInTheDocument();
+  test('navigates to the focus view for a video URL', () => {
+    submit('https://www.youtube.com/watch?v=D55ctBYF3AY');
+    expect(mockPush).toHaveBeenCalledWith('/focus?id=D55ctBYF3AY');
+  });
+
+  test('navigates to the focus view for a playlist URL', () => {
+    submit('https://www.youtube.com/playlist?list=PLabc123');
+    expect(mockPush).toHaveBeenCalledWith('/focus?list=PLabc123');
+  });
+
+  test('passes both the video and the playlist when a URL has both', () => {
+    submit('https://www.youtube.com/watch?v=D55ctBYF3AY&list=PLabc123');
+    expect(mockPush).toHaveBeenCalledWith('/focus?id=D55ctBYF3AY&list=PLabc123');
   });
 });

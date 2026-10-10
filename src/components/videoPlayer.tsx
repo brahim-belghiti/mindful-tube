@@ -19,7 +19,7 @@ export default function VideoPlayer({ videoId, playlistId, onTitleLoad, onVideoE
   const [isCompleted, setIsCompleted] = useState(false);
   const playerRef = useRef<YouTubeEvent['target'] | null>(null);
   const router = useRouter();
-  const { registerGetTime, registerSeekTo, setPlaylist, registerNextVideo, registerPrevVideo } = useVideoContext();
+  const { registerGetTime, registerSeekTo, setPlaylist, registerNextVideo, registerPrevVideo, registerPlayVideoAt } = useVideoContext();
 
   const validVideoId = Array.isArray(videoId) ? videoId[0] : videoId;
   const validPlaylistId = Array.isArray(playlistId) ? playlistId[0] : playlistId;
@@ -35,7 +35,10 @@ export default function VideoPlayer({ videoId, playlistId, onTitleLoad, onVideoE
     registerPrevVideo(() => {
       playerRef.current?.previousVideo();
     });
-  }, [registerGetTime, registerSeekTo, registerNextVideo, registerPrevVideo]);
+    registerPlayVideoAt((index: number) => {
+      playerRef.current?.playVideoAt(index);
+    });
+  }, [registerGetTime, registerSeekTo, registerNextVideo, registerPrevVideo, registerPlayVideoAt]);
 
   const videoOptions: YouTubeProps['opts'] = {
     width: '100%',
@@ -60,7 +63,7 @@ export default function VideoPlayer({ videoId, playlistId, onTitleLoad, onVideoE
     try {
       const list = player.getPlaylist();
       if (Array.isArray(list) && list.length > 1) {
-        setPlaylist({ index: player.getPlaylistIndex(), total: list.length });
+        setPlaylist({ index: player.getPlaylistIndex(), total: list.length, videoIds: list });
       } else {
         setPlaylist(null);
       }

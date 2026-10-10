@@ -10,6 +10,7 @@ Mindful Tube is a minimalist web app that lets you watch YouTube videos (and pla
 
 - **Distraction-free player** — no sidebar, no recommendations, no comments
 - **Playlist support** — paste a playlist URL and watch videos in order
+- **Playlist sidebar** — open a hidden-by-default sidebar to see the whole queue with video titles and jump to any video with one click
 - **Your own lists** — build named lists of videos, drag to reorder them, and play them end to end. A deliberate queue you assembled, not a feed
 - **Add to a list from anywhere** — from the player while watching, or from your watch history on the home page
 - **Built-in markdown notes** — write notes alongside the video with a full MDX editor
@@ -65,9 +66,10 @@ npm test
 
 1. Paste a YouTube video or playlist URL on the home page
 2. Watch the video in the focus view — notes panel is on the right
-3. Use the **Timestamp** button to capture moments linked to the video position
-4. When you're done, you land on the finish page where you can review your notes
-5. Click **Watch another video** to go again
+3. Click **Playlist** (or the `x / y` counter) to open the queue sidebar and pick any video
+4. Use the **Timestamp** button to capture moments linked to the video position
+5. When you're done, you land on the finish page where you can review your notes
+6. Click **Watch another video** to go again
 
 ---
 
